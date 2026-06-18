@@ -1,0 +1,31 @@
+
+
+services:
+  # =============================================================================
+  # SELF-HOSTED NOMINATIM
+  # =============================================================================
+  # Steps to enable:
+  #   1. Download your OSM extract:
+  #      wget -O data/sachsen-anhalt.osm.pbf \
+  #        https://download.geofabrik.de/europe/germany/sachsen-anhalt-latest.osm.pbf
+  #      Or just Magdeburg: https://github.com/imiq-project/data
+  #   2. Uncomment the nominatim block below
+  #   3. Change GEO_NOMINATIM_BASE_URL above to http://nominatim:8080
+  #   4. Run: docker compose -f docker-compose.selfhosted.yml up -d --build
+  #      (first run takes ~10-20 min to import the .pbf)
+  nominatim:
+    image: mediagis/nominatim:4.4
+    container_name: nominatim
+    volumes:
+      - nominatim_data:/var/lib/postgresql/14/main
+      - ./data/sachsen-anhalt.osm.pbf:/nominatim/data.osm.pbf:ro
+    environment:
+      - PBF_PATH=/nominatim/data.osm.pbf
+      - REPLICATION_URL=https://download.geofabrik.de/europe/germany/sachsen-anhalt-updates/
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    shm_size: 1gb
+
+volumes:
+  nominatim_data:    # uncomment when self-hosted nominatim is enabled

@@ -1,0 +1,41 @@
+
+
+services:
+
+  geocoding_service:
+    build:
+      context: .          # build from Dockerfile in the same folder
+      dockerfile: Dockerfile
+    container_name: geocoding_service
+    environment:
+      # --- Backend ---
+      # Public Nominatim API (dev). For self-hosted swap to http://nominatim:8080
+      - GEO_NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
+
+      # Nominatim usage policy requires identifying your app via email.
+      # Change this to your real email address.
+      - GEO_CONTACT_EMAIL=your@email.com
+
+      # --- Location bias (Magdeburg) ---
+      - GEO_BIAS_LAT=52.1205
+      - GEO_BIAS_LON=11.6276
+
+      # --- Cache ---
+      - GEO_CACHE_MAXSIZE=2000
+      - GEO_CACHE_TTL_SECONDS=3600   # cache results for 1 hour
+
+      # --- CORS ---
+      # Restrict this to your dashboard origin in production, e.g.:
+      # - GEO_CORS_ORIGINS=["http://localhost:3000","https://yourdashboard.com"]
+      - GEO_CORS_ORIGINS=["*"]
+
+    ports:
+      - "8001:8001"    # geocoding service available at http://localhost:8001
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8001/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
